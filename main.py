@@ -9,143 +9,145 @@ class ExpenseTracker:
         self.root.title("Expense Tracker")
         self.expenses = self.load_data()
 
+        # Р­Р»РµРјРµРЅС‚С‹ РёРЅС‚РµСЂС„РµР№СЃР°
         self.create_widgets()
         self.update_table()
 
     def create_widgets(self):
-        # Поля ввода
-        tk.Label(self.root, text="Сумма:").grid(row=0, column=0, padx=5, pady=5)
+        # РџРѕР»СЏ РІРІРѕРґР°
+        tk.Label(self.root, text="РЎСѓРјРјР°:").grid(row=0, column=0, padx=5, pady=5)
         self.amount_entry = tk.Entry(self.root)
         self.amount_entry.grid(row=0, column=1, padx=5, pady=5)
 
-        tk.Label(self.root, text="Категория:").grid(row=1, column=0, padx=5, pady=5)
+        tk.Label(self.root, text="РљР°С‚РµРіРѕСЂРёСЏ:").grid(row=1, column=0, padx=5, pady=5)
         self.category_var = tk.StringVar()
-        categories = ["Еда", "Транспорт", "Развлечения", "Жильё", "Прочее"]
+        categories = ["Р•РґР°", "РўСЂР°РЅСЃРїРѕСЂС‚", "Р Р°Р·РІР»РµС‡РµРЅРёСЏ", "Р–РёР»СЊС‘", "РџСЂРѕС‡РµРµ"]
         self.category_combo = ttk.Combobox(self.root, textvariable=self.category_var, values=categories)
         self.category_combo.grid(row=1, column=1, padx=5, pady=5)
 
-        tk.Label(self.root, text="Дата (ГГГГ-ММ-ДД):").grid(row=2, column=0, padx=5, pady=5)
+        tk.Label(self.root, text="Р”Р°С‚Р° (Р“Р“Р“Р“-РњРњ-Р”Р”):").grid(row=2, column=0, padx=5, pady=5)
         self.date_entry = tk.Entry(self.root)
         self.date_entry.grid(row=2, column=1, padx=5, pady=5)
 
-        # Кнопка добавления
-        tk.Button(self.root, text="Добавить расход", command=self.add_expense).grid(row=3, column=0, columnspan=2, pady=10)
+        # РљРЅРѕРїРєР° РґРѕР±Р°РІР»РµРЅРёСЏ
+        tk.Button(self.root, text="Р”РѕР±Р°РІРёС‚СЊ СЂР°СЃС…РѕРґ", command=self.add_expense).grid(row=3, column=0, columnspan=2, pady=10)
 
-        # Таблица
-        self.tree = ttk.Treeview(self.root, columns=("Сумма", "Категория", "Дата"), show="headings")
-        self.tree.heading("Сумма", text="Сумма")
-        self.tree.heading("Категория", text="Категория")
-        self.tree.heading("Дата", text="Дата")
+        # РўР°Р±Р»РёС†Р°
+        self.tree = ttk.Treeview(self.root, columns=("Amount", "Category", "Date"), show="headings")
+        self.tree.heading("Amount", text="РЎСѓРјРјР°")
+        self.tree.heading("Category", text="РљР°С‚РµРіРѕСЂРёСЏ")
+        self.tree.heading("Date", text="Р”Р°С‚Р°")
         self.tree.grid(row=4, column=0, columnspan=2, padx=5, pady=5)
 
-        # Фильтрация
-        tk.Label(self.root, text="Фильтр по категории:").grid(row=5, column=0, padx=5, pady=5)
+        # Р¤РёР»СЊС‚СЂР°С†РёСЏ
+        tk.Label(self.root, text="Р¤РёР»СЊС‚СЂ РїРѕ РєР°С‚РµРіРѕСЂРёРё:").grid(row=5, column=0, padx=5, pady=5)
         self.filter_var = tk.StringVar()
-        filter_combo = ttk.Combobox(self.root, textvariable=self.filter_var, values=["Все"] + categories)
-        filter_combo.set("Все")
+        filter_combo = ttk.Combobox(self.root, textvariable=self.filter_var, values=["Р’СЃРµ"] + categories)
+        filter_combo.set("Р’СЃРµ")
         filter_combo.grid(row=5, column=1, padx=5, pady=5)
 
-        tk.Label(self.root, text="Период с (ГГГГ-ММ-ДД):").grid(row=6, column=0, padx=5, pady=5)
+        tk.Label(self.root, text="РџРµСЂРёРѕРґ СЃ (Р“Р“Р“Р“-РњРњ-Р”Р”):").grid(row=6, column=0, padx=5, pady=5)
         self.start_date_entry = tk.Entry(self.root)
         self.start_date_entry.grid(row=6, column=1, padx=5, pady=5)
 
-        tk.Label(self.root, text="по (ГГГГ-ММ-ДД):").grid(row=7, column=0, padx=5, pady=5)
+        tk.Label(self.root, text="РїРѕ (Р“Р“Р“Р“-РњРњ-Р”Р”):").grid(row=7, column=0, padx=5, pady=5)
         self.end_date_entry = tk.Entry(self.root)
         self.end_date_entry.grid(row=7, column=1, padx=5, pady=5)
 
-        tk.Button(self.root, text="Применить фильтры", command=self.apply_filters).grid(row=8, column=0, columnspan=2, pady=10)
+        tk.Button(self.root, text="РџСЂРёРјРµРЅРёС‚СЊ С„РёР»СЊС‚СЂ", command=self.apply_filter).grid(row=8, column=0, columnspan=2, pady=10)
 
-        # Подсчёт суммы
-        self.total_label = tk.Label(self.root, text="Общая сумма: 0")
-        self.total_label.grid(row=9, column=0, columnspan=2, pady=5)
+        # РџРѕРґСЃС‡С‘С‚ СЃСѓРјРјС‹ Р·Р° РїРµСЂРёРѕРґ
+        tk.Label(self.root, text="РЎСѓРјРјР° Р·Р° РїРµСЂРёРѕРґ:").grid(row=9, column=0, padx=5, pady=5)
+        self.total_label = tk.Label(self.root, text="0.00")
+        self.total_label.grid(row=9, column=1, padx=5, pady=5)
 
-    def validate_input(self, amount, date_str):
+    def validate_input(self, amount_str, date_str):
         try:
-            amount = float(amount)
+            amount = float(amount_str)
             if amount <= 0:
-                raise ValueError("Сумма должна быть положительной")
+                raise ValueError("РЎСѓРјРјР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РїРѕР»РѕР¶РёС‚РµР»СЊРЅРѕР№")
         except ValueError:
-            messagebox.showerror("Ошибка", "Некорректная сумма")
+            messagebox.showerror("РћС€РёР±РєР°", "РќРµРєРѕСЂСЂРµРєС‚РЅР°СЏ СЃСѓРјРјР°")
             return False
 
         try:
             datetime.strptime(date_str, "%Y-%m-%d")
         except ValueError:
-            messagebox.showerror("Ошибка", "Неверный формат даты (используйте ГГГГ-ММ-ДД)")
+            messagebox.showerror("РћС€РёР±РєР°", "РќРµРІРµСЂРЅС‹Р№ С„РѕСЂРјР°С‚ РґР°С‚С‹ (РёСЃРїРѕР»СЊР·СѓР№С‚Рµ Р“Р“Р“Р“-РњРњ-Р”Р”)")
             return False
         return True
 
     def add_expense(self):
-        amount = self.amount_entry.get()
+        amount_str = self.amount_entry.get()
         category = self.category_var.get()
         date_str = self.date_entry.get()
 
-        if not self.validate_input(amount, date_str):
+        if not self.validate_input(amount_str, date_str):
             return
 
         expense = {
-            "amount": float(amount),
+            "amount": float(amount_str),
             "category": category,
             "date": date_str
         }
         self.expenses.append(expense)
         self.save_data()
         self.update_table()
-        # Очистка полей
+        self.clear_inputs()
+
+    def clear_inputs(self):
         self.amount_entry.delete(0, tk.END)
+        self.category_var.set("")
         self.date_entry.delete(0, tk.END)
 
     def update_table(self, filtered_expenses=None):
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-        display_expenses = filtered_expenses if filtered_expenses else self.expenses
-        for expense in display_expenses:
+        data = filtered_expenses if filtered_expenses is not None else self.expenses
+        for expense in data:
             self.tree.insert("", "end", values=(expense["amount"], expense["category"], expense["date"]))
 
-        total = sum(exp["amount"] for exp in display_expenses)
-        self.total_label.config(text=f"Общая сумма: {total}")
-
-    def apply_filters(self):
+    def apply_filter(self):
         category_filter = self.filter_var.get()
         start_date_str = self.start_date_entry.get()
         end_date_str = self.end_date_entry.get()
 
-        filtered = self.expenses
+        filtered = []
+        total = 0.0
 
-        if category_filter != "Все":
-            filtered = [exp for exp in filtered if exp["category"] == category_filter
+        for expense in self.expenses:
+            # Р¤РёР»СЊС‚СЂР°С†РёСЏ РїРѕ РєР°С‚РµРіРѕСЂРёРё
+            if category_filter != "Р’СЃРµ" and expense["category"] != category_filter:
+                continue
 
-        if start_date_str:
+            # Р¤РёР»СЊС‚СЂР°С†РёСЏ РїРѕ РґР°С‚Рµ
             try:
-                start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-                filtered = [exp for exp in filtered if datetime.strptime(exp["date"], "%Y-%m-%d") >= start_date]
+                expense_date = datetime.strptime(expense["date"], "%Y-%m-%d")
+                if start_date_str:
+                    start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+                    if expense_date < start_date:
+                        continue
+                if end_date_str:
+                    end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+                    if expense_date > end_date:
+                        continue
             except ValueError:
-                messagebox.showerror("Ошибка", "Неверный формат начальной даты")
-                return
+                continue  # РџСЂРѕРїСѓСЃРєР°РµРј Р·Р°РїРёСЃРё СЃ РЅРµРІРµСЂРЅРѕР№ РґР°С‚РѕР№
 
-        if end_date_str:
-            try:
-                end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
-                filtered = [exp for exp in filtered if datetime.strptime(exp["date"], "%Y-%m-%d") <= end_date]
-            except ValueError:
-                messagebox.showerror("Ошибка", "Неверный формат конечной даты")
-                return
+            filtered.append(expense)
+            total += expense["amount"]
 
         self.update_table(filtered)
-
-    def save_data(self):
-        with open("expenses.json", "w", encoding="utf-8") as f:
-            json.dump(self.expenses, f, ensure_ascii=False, indent=4)
+        self.total_label.config(text=f"{total:.2f}")
 
     def load_data(self):
         try:
             with open("expenses.json", "r", encoding="utf-8") as f:
                 return json.load(f)
-        except FileNotFoundError:
+        except (FileNotFoundError, json.JSONDecodeError):
             return []
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = ExpenseTracker(root)
-    root.mainloop()
+    def save_data(self):
+        with open("expenses.json", "w", encoding="utf-8") as f:
+            json.dump(self.expenses, f, ensure_ascii=False, indent=4
